@@ -973,6 +973,195 @@ function Footer() {
 }
 
 /* ══════════════════════════════════════════════════
+   FAQ セクション
+══════════════════════════════════════════════════ */
+const FAQ_ITEMS = [
+  {
+    q: '本当に手持ちの現金がなくても生活を始められますか？',
+    a: 'はい、可能です。初期費用や敷金・礼金は一切かかりません。当面の家賃等につきましても、初回の報酬をお受け取りになった際にお支払いいただければ大丈夫ですので、まとまった現金は不要です。遠方からお越しの場合の交通費や生活のサポートについても柔軟にご相談に乗ります。',
+  },
+  {
+    q: '寮は相部屋ですか？いきなり引っ越すのが少し不安です。',
+    a: '寮は相部屋ではなく、西船橋・船橋エリアの「完全個室（家具家電付き）」をご用意しますので、プライバシーは完全に守られます。もし環境が合うか不安な場合は、数日間の「お試し宿泊（体験入社）」も可能です。まずはオンライン面談でお気軽にご相談ください。',
+  },
+  {
+    q: 'どのような荷物を配送する仕事ですか？',
+    a: '主に大手ECサイトで注文された日用品や、企業向けのルート配送などが中心です。極端に重いものを運び続けるような重労働ではありませんし、素性の分からない荷物を扱うような業務は一切ありませんのでご安心ください。',
+  },
+  {
+    q: '普通免許しか持っていませんが、未経験でも大丈夫ですか？',
+    a: '普通自動車免許（AT限定可）があれば全く問題ありません。業務委託・正社員問わず、現在のスタッフも未経験スタートが多く活躍しています。最初のうちは先輩スタッフが同乗して丁寧にサポートします。',
+  },
+  {
+    q: '人間関係が苦手なのですが……。',
+    a: '配送中は人間関係に悩むことは一切ありません。車内はあなただけの完全なプライベート空間です。ご自身のペースで、好きな音楽を流しながらモクモクと仕事に取り組むことができる環境です。',
+  },
+  {
+    q: '遠方からの引っ越しで、荷物を運ぶ足（車）や費用がありません…。',
+    a: '弊社は物流会社ですので、自社の運送車両を使った「お引越しサポート」も可能です。ご自身で高いレンタカーや引越し業者を手配していただく必要はありません。手荷物だけで上京される方も、少し荷物が多い方も、状況に合わせて柔軟にサポートしますので、面談時に気兼ねなくご相談ください。',
+  },
+];
+
+function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <section style={{ background: '#fafaf9', padding: 'clamp(4rem,8vw,6rem) 1.5rem' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+        {/* ヘッダー */}
+        <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+          <span style={{
+            display: 'inline-block',
+            background: ORANGE_MID,
+            color: ORANGE_DARK,
+            fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em',
+            padding: '0.3rem 0.85rem', borderRadius: '100px',
+            textTransform: 'uppercase',
+          }}>FAQ</span>
+        </div>
+        <h2 style={{
+          fontFamily: 'var(--font-noto-serif)',
+          fontSize: 'clamp(1.4rem, 3.5vw, 1.9rem)',
+          fontWeight: 700, textAlign: 'center',
+          color: '#1c1917', marginBottom: '0.75rem',
+        }}>
+          よくある質問
+        </h2>
+        <p style={{
+          textAlign: 'center', color: '#78716c',
+          fontSize: '0.88rem', marginBottom: '2.5rem', lineHeight: 1.8,
+        }}>
+          応募前の不安・疑問にお答えします。
+        </p>
+
+        {/* アコーディオン */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {FAQ_ITEMS.map((item, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <div key={i} style={{
+                background: '#fff',
+                border: `1.5px solid ${isOpen ? ORANGE : '#e7e5e4'}`,
+                borderRadius: '14px',
+                overflow: 'hidden',
+                transition: 'border-color 0.25s ease',
+                boxShadow: isOpen ? '0 4px 20px rgba(249,115,22,0.1)' : '0 1px 4px rgba(0,0,0,0.05)',
+              }}>
+                {/* 質問行 */}
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : i)}
+                  style={{
+                    width: '100%', textAlign: 'left',
+                    padding: '1.1rem 1.25rem',
+                    display: 'flex', alignItems: 'center', gap: '0.85rem',
+                    background: 'transparent', border: 'none',
+                    cursor: 'pointer', fontFamily: 'var(--font-zen-kaku)',
+                  }}
+                >
+                  {/* Q バッジ */}
+                  <div style={{
+                    width: '28px', height: '28px', flexShrink: 0,
+                    borderRadius: '8px',
+                    background: isOpen ? `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})` : ORANGE_MID,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.7rem', fontWeight: 800,
+                    color: isOpen ? '#fff' : ORANGE_DARK,
+                    transition: 'all 0.25s',
+                  }}>Q</div>
+
+                  {/* 質問テキスト */}
+                  <span style={{
+                    flex: 1,
+                    fontSize: '0.88rem', fontWeight: 600,
+                    color: '#1c1917', lineHeight: 1.6,
+                    letterSpacing: '0.01em',
+                  }}>{item.q}</span>
+
+                  {/* 矢印アイコン */}
+                  <div style={{
+                    width: '24px', height: '24px', flexShrink: 0,
+                    borderRadius: '50%',
+                    background: isOpen ? `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})` : '#f5f5f4',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.3s ease',
+                    transform: isOpen ? 'rotate(180deg)' : 'none',
+                  }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 9L12 15L18 9" stroke={isOpen ? '#fff' : '#78716c'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </button>
+
+                {/* 回答（アコーディオン） */}
+                <div style={{
+                  maxHeight: isOpen ? '600px' : '0',
+                  overflow: 'hidden',
+                  transition: 'max-height 0.4s ease',
+                }}>
+                  <div style={{
+                    padding: '0 1.25rem 1.25rem',
+                    display: 'flex', gap: '0.85rem', alignItems: 'flex-start',
+                  }}>
+                    {/* A バッジ */}
+                    <div style={{
+                      width: '28px', height: '28px', flexShrink: 0,
+                      borderRadius: '8px',
+                      background: '#f0fdf4',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.7rem', fontWeight: 800,
+                      color: '#16a34a',
+                      marginTop: '2px',
+                    }}>A</div>
+                    <p style={{
+                      fontSize: '0.84rem', lineHeight: 1.9,
+                      color: '#57534e', letterSpacing: '0.02em',
+                    }}>{item.a}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div style={{
+          marginTop: '2.5rem', textAlign: 'center',
+          padding: '1.5rem',
+          background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
+          borderRadius: '16px',
+          boxShadow: '0 4px 24px rgba(249,115,22,0.35)',
+        }}>
+          <p style={{ fontSize: '0.88rem', color: '#fff', fontWeight: 600, marginBottom: '1rem', lineHeight: 1.7 }}>
+            他にも気になることがあれば、何でも聞いてください。<br />
+            <span style={{ fontWeight: 400, opacity: 0.85, fontSize: '0.8rem' }}>面談でお答えします。</span>
+          </p>
+          <a href="#apply" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '0.75rem 1.75rem',
+            background: '#fff',
+            color: ORANGE_DARK,
+            borderRadius: '100px',
+            fontSize: '0.88rem', fontWeight: 700,
+            textDecoration: 'none',
+            letterSpacing: '0.02em',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
+            transition: 'all 0.2s',
+          }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = 'none'; }}
+          >
+            無料で相談する
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M13 6L19 12L13 18" stroke={ORANGE_DARK} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════
    Page
 ══════════════════════════════════════════════════ */
 export default function DeliveryRecruitPage() {
@@ -982,6 +1171,7 @@ export default function DeliveryRecruitPage() {
       <Hero />
       <FeatureSection />
       <TargetSection />
+      <FAQSection />
       <ApplySection />
       <Footer />
     </main>
