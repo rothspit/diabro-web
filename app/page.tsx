@@ -196,9 +196,7 @@ function ChatForm() {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 120);
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 120);
   }, [messages, isTyping, currentButtons]);
 
   const handleAnswer = async (value: string) => {
@@ -228,6 +226,26 @@ function ChatForm() {
         if (error) {
           addMessage('bot', '送信中にエラーが発生しました。\nもう一度お試しください。');
         } else {
+          // Slack通知
+          const webhookUrl = process.env.NEXT_PUBLIC_SLACK_WEBHOOK_URL;
+          if (webhookUrl) {
+            const msgLines = [
+              `*【お名前】* ${newAnswers.name}`,
+              `*【年齢】* ${newAnswers.age ? newAnswers.age + '歳' : '未回答'}`,
+              `*【性別】* ${newAnswers.gender || '未回答'}`,
+              `*【免許】* ${newAnswers.has_license || '未回答'}`,
+              `*【希望エリア】* ${newAnswers.area || '未回答'}`,
+              `*【入居時期】* ${newAnswers.move_in_timing || '未回答'}`,
+              `*【連絡先】* ${newAnswers.contact}`,
+            ].join('\n');
+            fetch(webhookUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                text: `🚨 *Diabro Webから新規の応募が来ました！*\n\n${msgLines}`,
+              }),
+            }).catch(() => { /* 通知失敗は無視 */ });
+          }
           addMessage('bot', `${newAnswers.name}さん、ありがとうございました！🎉\n\n「${newAnswers.contact}」にご連絡します。\nしばらくお待ちください😊`);
           setIsDone(true);
         }
