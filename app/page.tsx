@@ -586,7 +586,7 @@ function Hero() {
 
           {/* タグ */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
-            {['🏠 寮完備', '💴 初期費用¥0', '🔰 未経験OK', '⏰ Wワーク可', '💸 日払い相談可'].map((tag) => (
+            {['🏠 寮完備', '💴 初期費用¥0', '🔰 未経験OK', '👩 女性もOK', '🚗 格安レンタル', '💸 日払い相談可'].map((tag) => (
               <span key={tag} style={{
                 fontSize: '0.78rem', padding: '0.35rem 0.85rem',
                 background: '#fff',
@@ -664,11 +664,13 @@ function Hero() {
           </div>
 
           {[
-            { icon: '💴', label: '月収目安', value: '25〜45万円' },
-            { icon: '📋', label: '雇用形態', value: '業務委託 / 正社員' },
-            { icon: '📍', label: '勤務地', value: '西船橋・船橋エリア' },
+            { icon: '💴', label: '月収目安', value: '25〜50万円以上' },
+            { icon: '📅', label: '日収目安', value: '15,000〜22,000円' },
+            { icon: '⏰', label: '勤務時間', value: '8:00〜20:00（配属先による）' },
+            { icon: '🏖', label: '休日', value: '週休2日制（業界では希少！）' },
+            { icon: '📍', label: '勤務地', value: '関東全域（直行直帰可）' },
             { icon: '🏠', label: '入居費用', value: '¥0（報酬相殺）' },
-            { icon: '🚗', label: '免許', value: '普通免許（AT可）' },
+            { icon: '🚗', label: '免許', value: '普通免許（AT可）・男女OK' },
             { icon: '🔰', label: '経験', value: '未経験・ブランクOK' },
           ].map((item) => (
             <div key={item.label} style={{
@@ -807,9 +809,13 @@ function FeatureSection() {
 ══════════════════════════════════════════════════ */
 function TargetSection() {
   const targets = [
+    { emoji: '💰', text: 'とにかく稼ぎたい。単価が良い仕事を探している' },
     { emoji: '✈️', text: '地元を出て、誰も知らない場所でやり直したい' },
     { emoji: '🏠', text: 'すぐに住む場所が必要。敷金礼金を払う余裕がない' },
+    { emoji: '🧑‍💼', text: '1人で気楽に、淡々と自分のペースで働きたい' },
     { emoji: '🔰', text: '未経験でも、ブランクがあっても働ける仕事を探している' },
+    { emoji: '👨‍👩‍👧', text: '家族を養うために、しっかり稼ぎたい' },
+    { emoji: '📅', text: '年齢的に再就職が難しく、長く続けられる仕事を探している' },
     { emoji: '⏰', text: '今の仕事と掛け持ちで、もっと稼ぎたい' },
   ];
 
@@ -977,6 +983,178 @@ function Footer() {
 /* ══════════════════════════════════════════════════
    FAQ セクション
 ══════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════
+   お仕事の流れ
+══════════════════════════════════════════════════ */
+function WorkflowSection() {
+  const steps = [
+    { num: '01', icon: '📦', title: '荷物の積み込み', desc: '営業所で荷物を積み込み。慣れれば手際よくこなせます。' },
+    { num: '02', icon: '🚗', title: '企業・個人宅へ配送', desc: '1人でドライブしながら、マイペースに配達。車内は完全なプライベート空間。' },
+    { num: '03', icon: '🔄', title: '積荷がなくなったら再積み込み', desc: 'そのまま営業所に戻って次の荷物を積み込み、再配達へ。' },
+    { num: '04', icon: '🏁', title: 'お疲れ様でした！', desc: '配達完了で終業。直行直帰なので無駄な時間がありません。' },
+  ];
+
+  return (
+    <section style={{ background: '#fff', padding: 'clamp(4rem,8vw,6rem) 1.5rem' }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+          <span style={{
+            display: 'inline-block',
+            background: ORANGE_MID,
+            color: ORANGE_DARK,
+            fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em',
+            padding: '0.3rem 0.85rem', borderRadius: '100px',
+            textTransform: 'uppercase',
+          }}>Workflow</span>
+        </div>
+        <h2 style={{
+          fontFamily: 'var(--font-noto-serif)',
+          fontSize: 'clamp(1.4rem, 3.5vw, 1.9rem)',
+          fontWeight: 700, textAlign: 'center',
+          color: '#1c1917', marginBottom: '0.75rem',
+        }}>
+          1日の仕事の流れ
+        </h2>
+        <p style={{ textAlign: 'center', color: '#78716c', fontSize: '0.88rem', marginBottom: '3rem', lineHeight: 1.8 }}>
+          シンプルで覚えやすい。3日あればひとり立ちできます。
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '0',
+          position: 'relative',
+        }}>
+          {steps.map((step, i) => (
+            <div key={i} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              padding: '1.5rem 1rem',
+              position: 'relative',
+              textAlign: 'center',
+            }}>
+              {/* 矢印コネクター */}
+              {i < steps.length - 1 && (
+                <div style={{
+                  position: 'absolute', right: '-10px', top: '2.5rem',
+                  zIndex: 10,
+                  display: 'flex', alignItems: 'center',
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12H19M13 6L19 12L13 18" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              )}
+              {/* ステップ番号 */}
+              <div style={{
+                fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12em',
+                color: ORANGE, marginBottom: '0.6rem',
+                fontFamily: 'monospace',
+              }}>STEP {step.num}</div>
+              {/* アイコン */}
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%',
+                background: ORANGE_MID,
+                border: `2px solid #fdba74`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.75rem', marginBottom: '1rem',
+                boxShadow: '0 2px 12px rgba(249,115,22,0.15)',
+              }}>{step.icon}</div>
+              <h3 style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1c1917', marginBottom: '0.5rem' }}>
+                {step.title}
+              </h3>
+              <p style={{ fontSize: '0.75rem', color: '#78716c', lineHeight: 1.75 }}>{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   待遇・特典
+══════════════════════════════════════════════════ */
+function BenefitsSection() {
+  const benefits = [
+    { icon: '🚙', title: '格安車両レンタル', desc: 'プライベートでも乗れる格安レンタカー制度あり。マイカーなしでOK。' },
+    { icon: '🏠', title: '寮完備（個室・家具家電付）', desc: '敷金・礼金不要。報酬相殺で初期費用ゼロ。今日から住める。' },
+    { icon: '🛣', title: '直行直帰OK', desc: '毎日の出勤ラッシュなし。現場に直接行って、直接帰れます。' },
+    { icon: '💸', title: '日払い相談可', desc: '給料日を待たずに受け取れます。急な出費にも対応。' },
+    { icon: '📚', title: '研修制度（約3日）', desc: '先輩が横乗りで丁寧に指導。3日あれば1人で走れるようになります。' },
+    { icon: '🚀', title: '独立支援制度', desc: '将来、軽貨物で独立したい方へのサポートも行っています。' },
+  ];
+
+  return (
+    <section style={{ background: ORANGE_LIGHT, padding: 'clamp(4rem,8vw,6rem) 1.5rem' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+          <span style={{
+            display: 'inline-block',
+            background: ORANGE_MID,
+            color: ORANGE_DARK,
+            fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em',
+            padding: '0.3rem 0.85rem', borderRadius: '100px',
+            textTransform: 'uppercase',
+          }}>Benefits</span>
+        </div>
+        <h2 style={{
+          fontFamily: 'var(--font-noto-serif)',
+          fontSize: 'clamp(1.4rem, 3.5vw, 1.9rem)',
+          fontWeight: 700, textAlign: 'center',
+          color: '#1c1917', marginBottom: '0.75rem',
+        }}>
+          待遇・福利厚生
+        </h2>
+        <p style={{ textAlign: 'center', color: '#78716c', fontSize: '0.88rem', marginBottom: '2.5rem', lineHeight: 1.8 }}>
+          稼ぐだけじゃない、長く続けられる環境を用意しています。
+        </p>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1rem',
+        }}>
+          {benefits.map((b, i) => (
+            <div key={i} style={{
+              background: '#fff',
+              borderRadius: '14px',
+              padding: '1.25rem',
+              border: '1.5px solid #fed7aa',
+              display: 'flex', gap: '0.85rem', alignItems: 'flex-start',
+              transition: 'all 0.25s',
+              boxShadow: '0 1px 6px rgba(0,0,0,0.05)',
+            }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = ORANGE;
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-3px)';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 24px rgba(249,115,22,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = '#fed7aa';
+                (e.currentTarget as HTMLDivElement).style.transform = 'none';
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 6px rgba(0,0,0,0.05)';
+              }}
+            >
+              <div style={{
+                width: '44px', height: '44px', flexShrink: 0,
+                borderRadius: '10px',
+                background: ORANGE_MID,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.35rem',
+              }}>{b.icon}</div>
+              <div>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1c1917', marginBottom: '0.3rem' }}>{b.title}</h3>
+                <p style={{ fontSize: '0.75rem', color: '#78716c', lineHeight: 1.75 }}>{b.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const FAQ_ITEMS = [
   {
     q: '本当に手持ちの現金がなくても生活を始められますか？',
@@ -1173,6 +1351,8 @@ export default function DeliveryRecruitPage() {
       <Hero />
       <FeatureSection />
       <TargetSection />
+      <WorkflowSection />
+      <BenefitsSection />
       <FAQSection />
       <ApplySection />
       <Footer />
