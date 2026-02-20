@@ -155,7 +155,9 @@ function ChatForm() {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 120);
+    setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 120);
   }, [messages, isTyping, currentButtons]);
 
   const handleAnswer = async (value: string) => {
