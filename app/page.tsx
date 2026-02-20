@@ -103,6 +103,47 @@ const STEPS: StepDef[] = [
   },
 ];
 
+
+/* ══════════════════════════════════════════════════
+   フィーチャーアイコン SVG
+══════════════════════════════════════════════════ */
+function FeatureIcon({ type, size = 28, color = ORANGE }: { type: string; size?: number; color?: string }) {
+  const props = {
+    xmlns: 'http://www.w3.org/2000/svg',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: color,
+    strokeWidth: '2',
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    style: { width: size, height: size, display: 'block' },
+  };
+  if (type === 'home') return (
+    <svg {...props}>
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
+  if (type === 'truck') return (
+    <svg {...props}>
+      <rect x="1" y="3" width="15" height="13" />
+      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="18.5" cy="18.5" r="2.5" />
+    </svg>
+  );
+  if (type === 'id') return (
+    <svg {...props}>
+      <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+      <path d="M8 10h.01" />
+      <path d="M12 10h4" />
+      <path d="M12 14h4" />
+      <path d="M8 14h.01" />
+    </svg>
+  );
+  return null;
+}
+
 /* ══════════════════════════════════════════════════
    チャットフォーム
 ══════════════════════════════════════════════════ */
@@ -442,6 +483,74 @@ function ChatForm() {
   );
 }
 
+
+
+/* ══════════════════════════════════════════════════
+   ロゴ SVG コンポーネント
+══════════════════════════════════════════════════ */
+function DiaBroLogo({ size = 32, color = ORANGE }: { size?: number; color?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: size, height: size, display: 'block', flexShrink: 0 }}
+    >
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+      <path d="M12 12l8.5-5.5" />
+    </svg>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   トラストバー
+══════════════════════════════════════════════════ */
+function TrustBar() {
+  const items = [
+    { icon: '📅', text: 'Since 2018' },
+    { icon: '📍', text: '西船橋を拠点に安定成長中' },
+    { icon: '💻', text: 'ITで物流を変える次世代企業' },
+    { icon: '👥', text: '男女・年齢・経験不問' },
+    { icon: '🏆', text: '大手ECの安定案件のみ取り扱い' },
+  ];
+
+  return (
+    <div style={{
+      background: '#fff7ed',
+      borderTop: '1px solid #fed7aa',
+      borderBottom: '1px solid #fed7aa',
+      padding: '0.7rem 1.5rem',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap',
+        justifyContent: 'center', alignItems: 'center',
+        gap: '0.25rem 2rem',
+      }}>
+        {items.map((item, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: '5px',
+            fontSize: '0.72rem', color: '#92400e', fontWeight: 500,
+            letterSpacing: '0.02em', whiteSpace: 'nowrap',
+          }}>
+            <span style={{ fontSize: '0.8rem' }}>{item.icon}</span>
+            {item.text}
+            {i < items.length - 1 && (
+              <span style={{ marginLeft: '1rem', color: '#fdba74', fontSize: '0.6rem' }}>|</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ══════════════════════════════════════════════════
    ナビゲーション
 ══════════════════════════════════════════════════ */
@@ -458,13 +567,8 @@ function Nav() {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <div style={{
-          width: '32px', height: '32px', borderRadius: '8px',
-          background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px',
-        }}>🚗</div>
-        <span style={{ fontWeight: 700, fontSize: '1rem', color: '#1c1917', letterSpacing: '-0.02em' }}>
+        <DiaBroLogo size={28} color={ORANGE} />
+        <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#1c1917', letterSpacing: '0.06em' }}>
           Diabro
         </span>
       </div>
@@ -657,9 +761,9 @@ function Hero() {
           <div style={{
             fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.12em',
             color: ORANGE, textTransform: 'uppercase', marginBottom: '1.25rem',
-            display: 'flex', alignItems: 'center', gap: '6px',
+            display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <div style={{ width: '20px', height: '2px', background: ORANGE, borderRadius: '1px' }} />
+            <DiaBroLogo size={18} color={ORANGE} />
             Job Details
           </div>
 
@@ -669,7 +773,7 @@ function Hero() {
             { icon: '⏰', label: '勤務時間', value: '8:00〜20:00（配属先による）' },
             { icon: '🏖', label: '休日', value: '週休2日制（業界では希少！）' },
             { icon: '📍', label: '勤務地', value: '関東全域（直行直帰可）' },
-            { icon: '🏠', label: '入居費用', value: '¥0（報酬相殺）' },
+            { icon: '🏠', label: '入居費用', value: '実質¥0（※初回報酬受取時にお支払い）' },
             { icon: '🚗', label: '免許', value: '普通免許（AT可）・男女OK' },
             { icon: '🔰', label: '経験', value: '未経験・ブランクOK' },
           ].map((item) => (
@@ -712,15 +816,15 @@ function Hero() {
 function FeatureSection() {
   const features = [
     {
-      emoji: '🏠',
+      svgPath: 'home',
       color: '#dbeafe',
       accent: '#3b82f6',
       title: '即日入居できる個室',
       subtitle: 'Private Room · Zero Deposit',
-      desc: '敷金・礼金・初期費用はすべてゼロ。西船橋エリアの完全個室に今日から住めます。報酬からの相殺なので手持ちがなくても大丈夫。',
+      desc: '敷金・礼金・初期費用はすべてゼロ。西船橋エリアの完全個室に今日から住めます。初回報酬受取時のお支払いなので手持ちがなくても大丈夫。',
     },
     {
-      emoji: '🚗',
+      svgPath: 'truck',
       color: '#dcfce7',
       accent: '#16a34a',
       title: '未経験から始められる',
@@ -728,7 +832,7 @@ function FeatureSection() {
       desc: '配送は一人で車に乗るだけ。難しい対人接客もなし。免許があれば大丈夫。ブランク明けの方も多数活躍中。',
     },
     {
-      emoji: '💰',
+      svgPath: 'id',
       color: ORANGE_MID,
       accent: ORANGE_DARK,
       title: '自分のペースで稼ぐ',
@@ -791,8 +895,10 @@ function FeatureSection() {
                 width: '52px', height: '52px', borderRadius: '14px',
                 background: f.color,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.6rem', marginBottom: '1.1rem',
-              }}>{f.emoji}</div>
+                marginBottom: '1.1rem',
+              }}>
+                <FeatureIcon type={f.svgPath} size={26} color={f.accent} />
+              </div>
               <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', color: f.accent, textTransform: 'uppercase', marginBottom: '0.35rem' }}>{f.subtitle}</div>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#1c1917', marginBottom: '0.75rem' }}>{f.title}</h3>
               <p style={{ fontSize: '0.82rem', lineHeight: 1.85, color: '#78716c' }}>{f.desc}</p>
@@ -965,13 +1071,23 @@ function Footer() {
       textAlign: 'center',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '0.65rem' }}>
-        <div style={{
-          width: '28px', height: '28px', borderRadius: '7px',
-          background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '13px',
-        }}>🚗</div>
-        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>Diabro</span>
+        <DiaBroLogo size={24} color="#fdba74" />
+        <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em' }}>Diabro</span>
+      </div>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.5rem 1.5rem',
+        marginBottom: '1rem',
+      }}>
+        {[
+          { label: '設立', value: '2018年' },
+          { label: '拠点', value: '千葉県船橋市（西船橋）' },
+          { label: '事業内容', value: 'ITを活用した次世代物流ソリューションの提供' },
+        ].map((item) => (
+          <div key={item.label} style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: '0.6rem', color: '#57534e', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.label}　</span>
+            <span style={{ fontSize: '0.65rem', color: '#a8a29e' }}>{item.value}</span>
+          </div>
+        ))}
       </div>
       <p style={{ fontSize: '0.65rem', color: '#78716c', letterSpacing: '0.06em' }}>
         © {new Date().getFullYear()} Diabro Co., Ltd. All rights reserved.
@@ -1349,6 +1465,7 @@ export default function DeliveryRecruitPage() {
     <main style={{ background: '#fff' }}>
       <Nav />
       <Hero />
+      <TrustBar />
       <FeatureSection />
       <TargetSection />
       <WorkflowSection />
