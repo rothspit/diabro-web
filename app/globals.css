@@ -104,7 +104,7 @@ body {
   z-index: 1;
 }
 
-/* ── Screen reader only ── */
+/* ── Screen reader only（SEO用 hidden テキスト） ── */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -149,4 +149,10 @@ body {
 textarea.form-input {
   resize: vertical;
   min-height: 130px;
+}
+
+/* ── Mobile overflow fix ── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
 }

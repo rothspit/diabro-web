@@ -230,13 +230,13 @@ function ChatForm() {
           const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
           if (webhookUrl) {
             const msgLines = [
-              `**【お名前】** ${newAnswers.name}`,
-              `**【年齢】** ${newAnswers.age ? newAnswers.age + '歳' : '未回答'}`,
-              `**【性別】** ${newAnswers.gender || '未回答'}`,
-              `**【免許】** ${newAnswers.has_license || '未回答'}`,
-              `**【希望エリア】** ${newAnswers.area || '未回答'}`,
-              `**【入居時期】** ${newAnswers.move_in_timing || '未回答'}`,
-              `**【連絡先】** ${newAnswers.contact}`,
+              `【お名前】 ${newAnswers.name}`,
+              `【年齢】 ${newAnswers.age ? newAnswers.age + '歳' : '未回答'}`,
+              `【性別】 ${newAnswers.gender || '未回答'}`,
+              `【免許】 ${newAnswers.has_license || '未回答'}`,
+              `【希望エリア】 ${newAnswers.area || '未回答'}`,
+              `【入居時期】 ${newAnswers.move_in_timing || '未回答'}`,
+              `【連絡先】 ${newAnswers.contact}`,
             ].join('\n');
             fetch(webhookUrl, {
               method: 'POST',
@@ -269,6 +269,8 @@ function ChatForm() {
     <div style={{
       display: 'flex', flexDirection: 'column',
       height: '500px',
+      width: '100%',
+      boxSizing: 'border-box',
       background: '#fff',
       border: '2px solid #fed7aa',
       borderRadius: '16px',
@@ -333,7 +335,7 @@ function ChatForm() {
               }}>🚗</div>
             )}
             <div style={{
-              maxWidth: '78%',
+              maxWidth: '78%', minWidth: 0,
               padding: '0.65rem 0.9rem',
               borderRadius: msg.from === 'bot' ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
               background: msg.from === 'bot' ? '#fff' : `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
@@ -383,6 +385,7 @@ function ChatForm() {
           <div style={{
             display: 'flex', flexWrap: 'wrap', gap: '0.5rem',
             paddingLeft: '36px',
+            paddingRight: '0.5rem',
             animation: 'fadeUp 0.35s ease both',
           }}>
             {currentButtons.map((opt) => (
@@ -1039,7 +1042,7 @@ function ApplySection() {
         pointerEvents: 'none',
       }} />
 
-      <div style={{ maxWidth: '580px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: '580px', width: '100%', boxSizing: 'border-box', margin: '0 auto', position: 'relative', zIndex: 10 }}>
         <div style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
           <span style={{
             display: 'inline-block',
