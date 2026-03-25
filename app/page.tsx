@@ -1203,7 +1203,7 @@ function ApplySection() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
           
           {/* 1. LINE */}
-          <a href="https://lin.ee/placeholder" target="_blank" rel="noopener noreferrer" style={{
+          <a href="https://line.me/ti/p/~rothspit" target="_blank" rel="noopener noreferrer" style={{
             display: 'flex', alignItems: 'center', gap: '1rem',
             background: '#06c755', color: '#fff',
             padding: '1.25rem 1.5rem', borderRadius: '16px',
