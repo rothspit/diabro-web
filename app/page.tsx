@@ -21,6 +21,7 @@ interface Answers {
   has_license: string;
   area: string;
   move_in_timing: string;
+  contact_method?: string;
   contact: string;
 }
 
@@ -29,8 +30,8 @@ interface StepDef {
   bot: string | ((a: Answers) => string);
   type: 'input' | 'buttons';
   options?: { label: string; value: string }[];
-  placeholder?: string;
-  inputType?: string;
+  placeholder?: string | ((a: Answers) => string);
+  inputType?: string | ((a: Answers) => string);
   formatDisplay?: (v: string) => string;
 }
 
@@ -96,10 +97,33 @@ const STEPS: StepDef[] = [
     ],
   },
   {
+    key: 'contact_method',
+    bot: 'ありがとうございます！\n最後に、希望の連絡方法を選んでください📱',
+    type: 'buttons',
+    options: [
+      { label: 'LINEで連絡', value: 'LINE' },
+      { label: '電話で連絡', value: '電話' },
+      { label: 'メールで連絡', value: 'メール' },
+    ],
+  },
+  {
     key: 'contact',
-    bot: 'ありがとうございます！\nLINE IDか電話番号を教えてください。\n担当者から直接ご連絡します📱',
+    bot: (a) => {
+      if (a.contact_method === 'LINE') return 'LINE IDを教えてください😊';
+      if (a.contact_method === 'メール') return 'メールアドレスを教えてください✉️';
+      return '電話番号を教えてください📞';
+    },
     type: 'input',
-    placeholder: 'LINE ID または 090-XXXX-XXXX',
+    placeholder: (a) => {
+      if (a.contact_method === 'LINE') return 'LINE ID または 登録URL';
+      if (a.contact_method === 'メール') return '例: 〇〇@example.com';
+      return '例: 090-XXXX-XXXX';
+    },
+    inputType: (a) => {
+      if (a.contact_method === 'メール') return 'email';
+      if (a.contact_method === '電話') return 'tel';
+      return 'text';
+    },
   },
 ];
 
@@ -153,14 +177,40 @@ function ChatForm() {
   const [inputValue, setInputValue] = useState('');
   const [answers, setAnswers] = useState<Answers>({
     name: '', age: '', gender: '', has_license: '',
-    area: '', move_in_timing: '', contact: '',
+    area: '', move_in_timing: '', contact_method: '', contact: '',
   });
   const [isTyping, setIsTyping] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [currentButtons, setCurrentButtons] = useState<{ label: string; value: string }[] | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(false);
+  useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
+
+  // チャットが開いたときや新しい入力ステップになったときにフォーカス
+  useEffect(() => {
+    if (isOpen && !isTyping && !currentButtons && !isDone) {
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 400);
+    }
+  }, [isOpen, isTyping, currentButtons, isDone]);
+
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const initialized = useRef(false);
+
+  useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#apply' || window.location.hash === '#chat') {
+        setIsOpen(true);
+        // ハッシュによるスクロールの干渉を防ぐため少しディレイ
+        setTimeout(() => setIsOpen(true), 150);
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    if (window.location.hash === '#apply' || window.location.hash === '#chat') {
+      setTimeout(() => setIsOpen(true), 300);
+    }
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   const addMessage = (from: MessageFrom, text: string) => {
     const id = `${Date.now()}-${Math.random()}`;
@@ -189,15 +239,22 @@ function ChatForm() {
       const text = typeof first.bot === 'function' ? first.bot(answers) : first.bot;
       await showBotMessage(text);
       if (first.type === 'buttons') setCurrentButtons(first.options!);
-      else setTimeout(() => inputRef.current?.focus(), 150);
+      else setTimeout(() => { if (isOpenRef.current) inputRef.current?.focus({ preventScroll: true }); }, 150);
     };
     init();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 120);
-  }, [messages, isTyping, currentButtons]);
+    setTimeout(() => {
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 120);
+  }, [messages, isTyping, currentButtons, isOpen]);
 
   const handleAnswer = async (value: string) => {
     const def = STEPS[step];
@@ -213,6 +270,10 @@ function ChatForm() {
       await new Promise((r) => setTimeout(r, 400));
       setIsTyping(true);
       setTimeout(async () => {
+        const finalContact = newAnswers.contact_method 
+          ? `[${newAnswers.contact_method}] ${newAnswers.contact}` 
+          : newAnswers.contact;
+
         const { error } = await supabase.from('applicants_delivery').insert([{
           name: newAnswers.name,
           age: newAnswers.age ? parseInt(newAnswers.age, 10) : null,
@@ -220,7 +281,7 @@ function ChatForm() {
           has_license: newAnswers.has_license,
           area: newAnswers.area,
           move_in_timing: newAnswers.move_in_timing,
-          contact: newAnswers.contact,
+          contact: finalContact,
         }]);
         setIsTyping(false);
         if (error) {
@@ -236,7 +297,7 @@ function ChatForm() {
               `【免許】 ${newAnswers.has_license || '未回答'}`,
               `【希望エリア】 ${newAnswers.area || '未回答'}`,
               `【入居時期】 ${newAnswers.move_in_timing || '未回答'}`,
-              `【連絡先】 ${newAnswers.contact}`,
+              `【連絡先】 ${finalContact}`,
             ].join('\n');
             fetch(webhookUrl, {
               method: 'POST',
@@ -246,7 +307,8 @@ function ChatForm() {
               }),
             }).catch(() => { /* 通知失敗は無視 */ });
           }
-          addMessage('bot', `${newAnswers.name}さん、ありがとうございました！🎉\n\n「${newAnswers.contact}」にご連絡します。\nしばらくお待ちください😊`);
+          const methodLabel = newAnswers.contact_method || 'ご連絡先';
+          addMessage('bot', `${newAnswers.name}さん、ありがとうございました！🎉\n\nご指定の「${methodLabel}」宛に、担当者から直接ご連絡します。\nしばらくお待ちください😊`);
           setIsDone(true);
         }
       }, 1400);
@@ -259,65 +321,128 @@ function ChatForm() {
     await new Promise((r) => setTimeout(r, 300));
     await showBotMessage(nextText);
     if (next.type === 'buttons') setCurrentButtons(next.options!);
-    else setTimeout(() => inputRef.current?.focus(), 150);
+    else setTimeout(() => { if (isOpenRef.current) inputRef.current?.focus({ preventScroll: true }); }, 150);
   };
 
   const currentDef = STEPS[step];
   const showInput = !isDone && !isTyping && !currentButtons && currentDef?.type === 'input';
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column',
-      height: '500px',
-      width: '100%',
-      boxSizing: 'border-box',
-      background: '#fff',
-      border: '2px solid #fed7aa',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      boxShadow: '0 8px 40px rgba(249,115,22,0.12)',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '0.9rem 1.25rem',
-        borderBottom: '1px solid #fed7aa',
-        display: 'flex', alignItems: 'center', gap: '10px',
-        background: 'linear-gradient(to right, #fff7ed, #fff)',
-        flexShrink: 0,
-      }}>
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '50%',
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9998,
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
           background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
+          color: '#fff',
+          border: 'none',
+          boxShadow: '0 4px 20px rgba(249,115,22,0.4)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '16px', flexShrink: 0,
-          boxShadow: '0 2px 8px rgba(249,115,22,0.4)',
-        }}>🚗</div>
-        <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1c1917', letterSpacing: '0.02em' }}>
-            採用担当
+          cursor: 'pointer',
+          transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          transform: isOpen ? 'scale(0)' : 'scale(1)',
+        }}
+        aria-label="チャットを開く"
+        type="button"
+      >
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        {!isOpen && !isDone && step === 0 && (
+          <div style={{
+            position: 'absolute', top: '0', right: '0',
+            width: '16px', height: '16px', borderRadius: '50%',
+            background: '#ef4444', border: '2px solid #fff',
+          }} />
+        )}
+      </button>
+
+      <div style={{
+        position: 'fixed',
+        bottom: isOpen ? '24px' : '-650px',
+        right: '24px',
+        zIndex: 9999,
+        display: 'flex', flexDirection: 'column',
+        height: '580px',
+        maxHeight: 'calc(100vh - 48px)',
+        width: 'calc(100vw - 48px)',
+        maxWidth: '380px',
+        boxSizing: 'border-box',
+        background: '#fff',
+        border: 'none',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: '0 12px 48px rgba(0,0,0,0.15), 0 0 0 1px rgba(249,115,22,0.1)',
+        transition: 'bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease',
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? 'auto' : 'none',
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: '0.9rem 1.25rem',
+          borderBottom: '1px solid #fed7aa',
+          display: 'flex', alignItems: 'center', gap: '10px',
+          background: 'linear-gradient(to right, #fff7ed, #fff)',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '16px', flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(249,115,22,0.4)',
+          }}>🚗</div>
+          <div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#1c1917', letterSpacing: '0.02em' }}>
+              採用担当
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.7)' }} />
+              <span style={{ fontSize: '0.65rem', color: '#78716c' }}>オンライン</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,0.7)' }} />
-            <span style={{ fontSize: '0.65rem', color: '#78716c' }}>オンライン</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {!isDone && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                {STEPS.map((_, i) => (
+                  <div key={i} style={{
+                    width: i <= step ? '16px' : '5px',
+                    height: '5px',
+                    borderRadius: '2.5px',
+                    background: i <= step ? ORANGE : '#e7e5e4',
+                    transition: 'all 0.3s ease',
+                  }} />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setIsOpen(false)}
+              type="button"
+              style={{
+                background: 'none', border: 'none', fontSize: '1.25rem',
+                color: '#78716c', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: '28px', height: '28px', borderRadius: '50%', transition: 'background 0.2s',
+                marginLeft: '4px',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#f5f5f4')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
+            >
+              ×
+            </button>
           </div>
         </div>
-        {!isDone && (
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            {STEPS.map((_, i) => (
-              <div key={i} style={{
-                width: i <= step ? '18px' : '6px',
-                height: '6px',
-                borderRadius: '3px',
-                background: i <= step ? ORANGE : '#e7e5e4',
-                transition: 'all 0.3s ease',
-              }} />
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', background: '#fafaf9' }}>
+      <div 
+        ref={messagesContainerRef}
+        style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem', background: '#fafaf9' }}
+      >
         {messages.map((msg) => (
           <div key={msg.id} style={{
             display: 'flex',
@@ -433,7 +558,6 @@ function ChatForm() {
             ✅ 応募が完了しました
           </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
       {/* Input */}
@@ -447,8 +571,8 @@ function ChatForm() {
         }}>
           <input
             ref={inputRef}
-            type={currentDef?.inputType || 'text'}
-            placeholder={currentDef?.placeholder}
+            type={typeof currentDef?.inputType === 'function' ? currentDef.inputType(answers) : (currentDef?.inputType || 'text')}
+            placeholder={typeof currentDef?.placeholder === 'function' ? currentDef.placeholder(answers) : currentDef?.placeholder}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { const v = inputValue.trim(); if (v) handleAnswer(v); } }}
@@ -499,8 +623,14 @@ function ChatForm() {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(10px); }
+          60% { transform: translateY(5px); }
+        }
       `}</style>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -1062,11 +1192,89 @@ function ApplySection() {
           まず、話だけでも聞かせてください。
         </h2>
         <p style={{
-          textAlign: 'center', marginBottom: '2rem',
+          textAlign: 'center', marginBottom: '2.5rem',
           fontSize: '0.85rem', color: '#78716c', lineHeight: 1.8,
         }}>
-          以下のチャットに答えるだけで完了。<strong style={{ color: '#1c1917' }}>1〜2分</strong>で終わります。
+          ご自身のスタイルに合わせて、3つの方法からお選びください。<br />
+          どれを選んでも手軽にコンタクトできます。
         </p>
+
+        {/* 3つの応募方法 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
+          
+          {/* 1. LINE */}
+          <a href="https://lin.ee/placeholder" target="_blank" rel="noopener noreferrer" style={{
+            display: 'flex', alignItems: 'center', gap: '1rem',
+            background: '#06c755', color: '#fff',
+            padding: '1.25rem 1.5rem', borderRadius: '16px',
+            textDecoration: 'none', boxShadow: '0 4px 15px rgba(6, 199, 85, 0.2)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(6, 199, 85, 0.3)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(6, 199, 85, 0.2)'; }}
+          >
+            <div style={{ fontSize: '2rem' }}>💬</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.9, marginBottom: '0.2rem' }}>カンタン1分・一番人気</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.05em' }}>LINEでサクッと相談する</div>
+            </div>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          </a>
+
+          {/* 2. Web Form */}
+          <a href="/recruit" style={{
+            display: 'flex', alignItems: 'center', gap: '1rem',
+            background: '#fff', color: '#1c1917',
+            border: '2px solid #e7e5e4',
+            padding: '1.25rem 1.5rem', borderRadius: '16px',
+            textDecoration: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#d6d3d1'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.06)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#e7e5e4'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.03)'; }}
+          >
+            <div style={{ fontSize: '2rem' }}>✉️</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#78716c', marginBottom: '0.2rem' }}>24時間受付・じっくり記入</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.05em' }}>WEBフォームから応募する</div>
+            </div>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%', background: '#f5f5f4',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#a8a29e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          </a>
+
+          {/* 3. Floating Chat */}
+          <a href="#chat" style={{
+            display: 'flex', alignItems: 'center', gap: '1rem',
+            background: `linear-gradient(135deg, ${ORANGE}, ${ORANGE_DARK})`, color: '#fff',
+            padding: '1.25rem 1.5rem', borderRadius: '16px',
+            textDecoration: 'none', boxShadow: '0 4px 15px rgba(249, 115, 22, 0.25)',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(249, 115, 22, 0.35)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 15px rgba(249, 115, 22, 0.25)'; }}
+          >
+            <div style={{ fontSize: '2rem' }}>🤖</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, opacity: 0.9, marginBottom: '0.2rem' }}>その場で自動応答</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.05em' }}>チャットボットで相談する</div>
+            </div>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          </a>
+        </div>
 
         <ChatForm />
 

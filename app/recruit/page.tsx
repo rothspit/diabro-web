@@ -515,9 +515,18 @@ function ContactSection() {
     setLoading(true);
     setError('');
 
+    const trimmedName = name.trim();
+    const trimmedContact = contact.trim();
+
+    if (!trimmedName || !trimmedContact) {
+      setError('必須項目（お名前・連絡先）を入力してください。');
+      setLoading(false);
+      return;
+    }
+
     const { error: sbError } = await supabase
       .from('applicants_driver')
-      .insert([{ name, contact, message }]);
+      .insert([{ name: trimmedName, contact: trimmedContact, message }]);
 
     if (sbError) {
       setError('送信に失敗しました。もう一度お試しください。');
@@ -741,17 +750,25 @@ function ContactSection() {
                   fontWeight: 300,
                 }}
               >
-                連絡先（LINE / Tel / メール）
+                連絡先（電話番号 または メールアドレス）※必須
               </label>
               <input
                 id="contact"
                 type="text"
                 className="form-input"
-                placeholder="LINEのIDまたは電話番号"
+                placeholder="例: 090-1234-5678 または test@example.com"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 required
               />
+              <p style={{
+                marginTop: '0.5rem',
+                fontSize: '0.75rem',
+                color: 'rgba(148,163,184,0.7)',
+                lineHeight: 1.5,
+              }}>
+                ※ご入力いただいた連絡先は面談の調整のみに使用し、しつこい営業連絡などは一切行いません。
+              </p>
             </div>
 
             <div>
